@@ -24,20 +24,28 @@
     "7-zip": {
       "walletPoweredBy": "7-Zip",
       "encryptionCommand": [
-        "C:\\Program Files (x86)\\7-Zip\\7zip.exe",
+        "C:\\Program Files\\7-Zip\\7z.exe",
         "a",
-        "-aoa"
+        "-a0a",
+        "-t7z",
+        "-m0=lzma2",
+        "-mx=9",
+        "-mfb=64",
+        "-md=32m",
+        "-ms=on",
+        "-mhe=on",
+        "-si"
       ],
       "decryptionCommand": [
-        "C:\\Program Files (x86)\\7-Zip\\7zip.exe",
+        "C:\\Program Files\\7-Zip\\7z.exe",
         "x",
-        "-aoa"
+        "-so"
       ],
       "encryptParam": "-p%",
       "decryptParam": "-p%",
       "fileOutParam": "",
       "fileInParam": "",
-      "myFileTypes": "((\"7-Zip files\", \"*.7z\"), (\"Backup files\", \"*.bak\"), (\"All files\", \"*\"\"))"
+      "myFileTypes": "((\"7-Zip files\", \"*.7z\"), (\"Backup files\", \"*.bak\"), (\"All files\", \"*\"))"
     }
   }
 }

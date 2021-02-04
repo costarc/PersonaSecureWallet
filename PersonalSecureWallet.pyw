@@ -15,12 +15,11 @@ walletAuthor = 'Ronivon Costa (2021), ronivon.costa@gmail.com'
 passphrase = ''
 isObfuscated = False
 walletContent = ''
-configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files (x86)\\7-Zip\\7zip.exe', 'a', '-aoa'], 'decryptionCommand': ['C:\\Program Files (x86)\\7-Zip\\7zip.exe', 'x', '-aoa'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
+configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'a', '-a0a', '-t7z', '-m0=lzma2', '-mx=9', '-mfb=64', '-md=32m', '-ms=on', '-mhe=on', '-si'], 'decryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'x', '-so'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
 if platform.system() == 'Windows':
     walletPoweredBy = '7-zip'
 else:
     walletPoweredBy = 'openssl'
-print(platform.system())
 
 def showVersion():
     global configData
