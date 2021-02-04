@@ -26,7 +26,7 @@
       "encryptionCommand": [
         "C:\\Program Files\\7-Zip\\7z.exe",
         "a",
-        "-a0a",
+        "-aoa",
         "-t7z",
         "-m0=lzma2",
         "-mx=9",

@@ -3,7 +3,7 @@ from tkinter import scrolledtext
 from tkinter import messagebox
 from tkinter import filedialog
 from subprocess import Popen, PIPE
-from shutil import copyfile
+from shutil import move
 import platform
 import json
 import os
@@ -15,7 +15,7 @@ walletAuthor = 'Ronivon Costa (2021), ronivon.costa@gmail.com'
 passphrase = ''
 isObfuscated = False
 walletContent = ''
-configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'a', '-a0a', '-t7z', '-m0=lzma2', '-mx=9', '-mfb=64', '-md=32m', '-ms=on', '-mhe=on', '-si'], 'decryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'x', '-so'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
+configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'a', '-aoa', '-t7z', '-m0=lzma2', '-mx=9', '-mfb=64', '-md=32m', '-ms=on', '-mhe=on', '-si'], 'decryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'x', '-so'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
 if platform.system() == 'Windows':
     walletPoweredBy = '7-zip'
 else:
@@ -122,7 +122,7 @@ def saveWallet():
     global walletContent
     global configData
     global walletPoweredBy
-
+    
     encryptParam = configData['encryptionToool'][walletPoweredBy]['encryptParam']
     fileOutParam = configData['encryptionToool'][walletPoweredBy]['fileOutParam']
     myFileTypes = ast.literal_eval(configData['encryptionToool'][walletPoweredBy]['myFileTypes'])
@@ -133,11 +133,13 @@ def saveWallet():
 
     walletName = filedialog.asksaveasfilename(filetypes = myFileTypes)
     if os.path.isfile(walletName):
-        copyfile(walletName, walletName+'.bak')
-        os.remove(walletName)
+        try:
+            move(walletName, walletName+'.bak')
+        except Exception as e:
+            messagebox.showerror('Failed', 'Failed to backup current wallet.\nSave using a different name.\n'+str(e))
+            return
 
     if len(passphrase) == 0:
-
         try:
             if isObfuscated == False:
                 walletContent = txt.get('1.0', END)
@@ -164,7 +166,7 @@ def saveWallet():
                 saveCommand.append(fileOutParam)
 
             saveCommand.append(walletName)
-
+            
             process = Popen(saveCommand, stdout=PIPE, stdin=PIPE, stderr=PIPE)
             processoutput = process.communicate(input = fileContent)[0]
             exit_code = process.wait()
@@ -174,8 +176,7 @@ def saveWallet():
                 messagebox.showerror('Failed', str(process) + ' - ' + str(processoutput))
 
         except Exception as e:
-            messagebox.showerror('Failed', str(e))
-
+            messagebox.showerror('Failed Exception', str(e))
 
 def toggleObfuscation():
     global isObfuscated
