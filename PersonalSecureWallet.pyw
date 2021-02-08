@@ -11,7 +11,7 @@ import ast
 
 walletTitle = 'Personal Secure Wallet'
 walletVersion = '0.1'
-walletAuthor = 'Ronivon Costa (2021), ronivon.costa@gmail.com'
+walletAuthor = 'Ronivon Costa (2021) ronivon.costa@gmail.com'
 passphrase = ''
 isObfuscated = False
 walletContent = ''

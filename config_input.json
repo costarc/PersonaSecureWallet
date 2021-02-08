@@ -46,6 +46,20 @@
       "fileOutParam": "",
       "fileInParam": "",
       "myFileTypes": "((\"7-Zip files\", \"*.7z\"), (\"Backup files\", \"*.bak\"), (\"All files\", \"*\"))"
+    },
+    "zip": {
+      "walletPoweredBy": "Zip",
+      "encryptionCommand": [
+        "/usr/bin/zip"
+      ],
+      "decryptionCommand": [
+        "/usr/bin/unzip"
+      ],
+      "encryptParam": "-e",
+      "decryptParam": "",
+      "fileOutParam": ">",
+      "fileInParam": "",
+      "myFileTypes": "((\"Zip files\", \"*.zip\"), (\"Backup files\", \"*.bak\"), (\"All files\", \"*\"))"
     }
   }
 }
