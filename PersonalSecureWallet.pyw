@@ -166,12 +166,13 @@ def saveWallet():
         except Exception as e:
             messagebox.showerror('Failed', str(e))
     else:
-        try:
+        if True:
+        #try:
             if isObfuscated == False:
-                fileContent1 = bytes(textSocial.get('1.0', END), encoding = 'utf-8')
-                fileContent2 = bytes(texteComm.get('1.0', END), encoding = 'utf-8')
-                fileContent3 = bytes(textProj.get('1.0', END), encoding = 'utf-8')
-                fileContent4 = bytes(textOthers.get('1.0', END), encoding = 'utf-8')
+                fileContent1 = textSocial.get('1.0', END)
+                fileContent2 = texteComm.get('1.0', END)
+                fileContent3 = textProj.get('1.0', END)
+                fileContent4 = textOthers.get('1.0', END)
                 walletContent['data'].append({'social':fileContent1})
                 walletContent['data'].append({'ecommerce':fileContent2})
                 walletContent['data'].append({'projects':fileContent3})
@@ -197,17 +198,20 @@ def saveWallet():
                 saveCommand.append(fileOutParam)
 
             saveCommand.append(walletName)
+           
+            print(walletContent)
+            print(type(walletContent))
 
             process = Popen(saveCommand, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-            processoutput = process.communicate(input = walletContent)[0]
+            processoutput = process.communicate(input = bytes(str(walletContent), "utf-8"))
             exit_code = process.wait()
             if exit_code == 0:
                 messagebox.showinfo('Success', 'File Saved.')
             else:
                 messagebox.showerror('Failed', str(process) + ' - ' + str(processoutput))
 
-        except Exception as e:
-            messagebox.showerror('Failed Exception', str(e))
+        #except Exception as e:
+        #    messagebox.showerror('Failed Exception', str(e))
 
 def toggleView(oper):
     global isObfuscated
