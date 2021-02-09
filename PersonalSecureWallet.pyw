@@ -15,6 +15,12 @@ walletAuthor = 'Ronivon Costa (2021) ronivon.costa@gmail.com'
 passphrase = ''
 isObfuscated = False
 walletContent = ''
+socialContent = ''
+ecommContent = ''
+projContent = ''
+othercontent = ''
+view = 'social'
+
 configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'a', '-aoa', '-t7z', '-m0=lzma2', '-mx=9', '-mfb=64', '-md=32m', '-ms=on', '-mhe=on', '-si'], 'decryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'x', '-so'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
 if platform.system() == 'Windows':
     walletPoweredBy = '7-zip'
@@ -119,7 +125,10 @@ def openWallet():
 def saveWallet():
     global passphrase
     global isObfuscated
-    global walletContent
+    global socialContent
+    global ecommContent
+    global projContent
+    global otherContent
     global configData
     global walletPoweredBy
     
@@ -139,22 +148,44 @@ def saveWallet():
             messagebox.showerror('Failed', 'Failed to backup current wallet.\nSave using a different name.\n'+str(e))
             return
 
+    walletContent = {'config': [{}], 'data': [{}] }
+
     if len(passphrase) == 0:
         try:
-            if isObfuscated == False:
-                walletContent = txt.get('1.0', END)
+            socialContent = textSocial.get('1.0', END)
+            ecommContent = texteComm.get('1.0', END)
+            projContent = textProj.get('1.0', END)
+            otherContent = textOthers.get('1.0', END)
+            walletContent['data'].append({'social':socialContent})
+            walletContent['data'].append({'ecommerce':ecommContent})
+            walletContent['data'].append({'projects':projContent})
+            walletContent['data'].append({'others':otherContent})
 
             with open(walletName, 'a') as fileOut:
-                fileOut.write(walletContent)
+                fileOut.write(json.dumps(walletContent))
         except Exception as e:
             messagebox.showerror('Failed', str(e))
     else:
         try:
             if isObfuscated == False:
-                fileContent = bytes(txt.get('1.0', END), encoding = 'utf-8')
+                fileContent1 = bytes(textSocial.get('1.0', END), encoding = 'utf-8')
+                fileContent2 = bytes(texteComm.get('1.0', END), encoding = 'utf-8')
+                fileContent3 = bytes(textProj.get('1.0', END), encoding = 'utf-8')
+                fileContent4 = bytes(textOthers.get('1.0', END), encoding = 'utf-8')
+                walletContent['data'].append({'social':fileContent1})
+                walletContent['data'].append({'ecommerce':fileContent2})
+                walletContent['data'].append({'projects':fileContent3})
+                walletContent['data'].append({'others':fileContent4})
             else:
-                fileContent = bytes(walletContent[:], encoding = 'utf-8')
-    
+                fileContent1 = bytes(socialContent[:], encoding = 'utf-8')
+                fileContent2 = bytes(ecommContent[:], encoding = 'utf-8')
+                fileContent3 = bytes(projContent[:], encoding = 'utf-8')
+                fileContent4 = bytes(otherContent[:], encoding = 'utf-8')
+                walletContent['data'].append({'social':fileContent1})
+                walletContent['data'].append({'ecommerce':fileContent2})
+                walletContent['data'].append({'projects':fileContent3})
+                walletContent['data'].append({'others':fileContent4})
+
             if '%' in encryptParam:
                 cryptParm = encryptParam.replace('%',passphrase)
                 saveCommand.append(cryptParm)
@@ -166,9 +197,9 @@ def saveWallet():
                 saveCommand.append(fileOutParam)
 
             saveCommand.append(walletName)
-            
+
             process = Popen(saveCommand, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-            processoutput = process.communicate(input = fileContent)[0]
+            processoutput = process.communicate(input = walletContent)[0]
             exit_code = process.wait()
             if exit_code == 0:
                 messagebox.showinfo('Success', 'File Saved.')
@@ -178,24 +209,77 @@ def saveWallet():
         except Exception as e:
             messagebox.showerror('Failed Exception', str(e))
 
-def toggleObfuscation():
+def toggleView(oper):
     global isObfuscated
-    global walletContent
+    global socialContent
+    global ecommContent
+    global projContent
+    global otherContent
+    global view
+    
+    if oper == 'obfs':
+        if isObfuscated == False:
+            socialContent = textSocial.get('1.0', END).strip()
+            ecommContent = texteComm.get('1.0', END).strip()
+            projContent = textProj.get('1.0', END).strip()
+            otherContent = textOthers.get('1.0', END).strip()
 
-    if isObfuscated == False:
-        walletContent = txt.get('1.0', END).strip()
-        isObfuscated = True
-        txt.delete('1.0', END)
-        for line in walletContent.splitlines():
-            txt.insert('1.0', '*' * len(line) + '\n')
+            isObfuscated = True
+            textSocial.delete('1.0', END)
+            texteComm.delete('1.0', END)
+            textProj.delete('1.0', END)
+            textOthers.delete('1.0', END)
+            for line in socialContent.splitlines():
+                textSocial.insert('1.0', '*' * len(line) + '\n')
+            for line in ecommContent.splitlines():
+                texteComm.insert('1.0', '*' * len(line) + '\n')
+            for line in projContent.splitlines():
+                textProj.insert('1.0', '*' * len(line) + '\n')
+            for line in otherContent.splitlines():
+                textOthers.insert('1.0', '*' * len(line) + '\n')
 
-        txt.configure(state = 'disabled')
+            textSocial.configure(state = 'disabled')
+            texteComm.configure(state = 'disabled')
+            textProj.configure(state = 'disabled')
+            textOthers.configure(state = 'disabled')
+        else:
+            textSocial.configure(state = 'normal')
+            textSocial.delete('1.0', END)
+            textSocial.insert('1.0', socialContent)
+            texteComm.configure(state = 'normal')
+            texteComm.delete('1.0', END)
+            texteComm.insert('1.0', ecommContent)
+            textProj.configure(state = 'normal')
+            textProj.delete('1.0', END)
+            textProj.insert('1.0', projContent)
+            textOthers.configure(state = 'normal')
+            textOthers.delete('1.0', END)
+            textOthers.insert('1.0', otherContent)
+            isObfuscated = False
+    elif oper == view:
+        pass
     else:
-        txt.configure(state = 'normal')
-        txt.delete('1.0', END)
-        txt.insert('1.0', walletContent)
-        isObfuscated = False
+        
+        if view == 'social':
+            textGroupSocial.grid_remove()
+        elif view == 'ecomm':
+            textGroupeComm.grid_remove()
+        elif view == 'projects':
+            textGroupProj.grid_remove()
+        elif view == 'others':
+            textGroupOthers.grid_remove()
+        
+        if oper == 'social':
+            textGroupSocial.grid()
+        elif oper == 'ecomm':
+            textGroupeComm.grid()
+        elif oper == 'projects':
+            textGroupProj.grid()
+        elif oper == 'others':
+            textGroupOthers.grid()
 
+        view = oper
+        
 def setPoweredBy(toolChoice):
     global walletPoweredBy
     walletPoweredBy = toolChoice
@@ -227,7 +311,7 @@ def setOptions():
 
 root = Tk()
 root.title("Personal Safe Wallet")
-root.geometry('350x440')
+root.geometry('500x200')
 
 menuOptions = Menu(root)
 root.config(menu = menuOptions)
@@ -242,24 +326,56 @@ configmenu.add_command(label='Passphrase', command = setPass)
 configmenu.add_command(label='Options', command = setOptions)
 menuOptions.add_cascade(label='Edit', menu = configmenu)
 
-obfsmenu = Menu(menuOptions, tearoff = 0)
-obfsmenu.add_command(label='Hide/View Secrets', command = toggleObfuscation)
-menuOptions.add_cascade(label='Window', menu = obfsmenu)
+windowmenu = Menu(menuOptions, tearoff = 0)
+windowmenu.add_command(label='Hide/View Secrets', command = lambda: toggleView('obfs'))
+windowmenu.add_command(label='Social', command = lambda: toggleView('social'))
+windowmenu.add_command(label='eCommerce', command = lambda: toggleView('ecomm'))
+windowmenu.add_command(label='Projects', command = lambda: toggleView('projects'))
+windowmenu.add_command(label='Other Secrets', command = lambda: toggleView('others'))
+menuOptions.add_cascade(label='View', menu = windowmenu)
 
 aboutmenu = Menu(menuOptions, tearoff = 0)
 aboutmenu.add_command(label='Version', command = showVersion)
 menuOptions.add_cascade(label='About', menu = aboutmenu)
 
-textGroup = LabelFrame(root, text = 'Secrets', padx = 5, pady = 5)
-textGroup.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10, sticky = E+W+N+S)
-textGroup.rowconfigure(0, weight = 1)
-textGroup.columnconfigure(0, weight = 1)
+textGroupeComm = LabelFrame(root, text = 'e-Commerce & Buy Web sites', padx = 5, pady = 5)
+textGroupeComm.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
+textGroupeComm.rowconfigure(0, weight = 1)
+textGroupeComm.columnconfigure(0, weight = 1)
+
+textGroupProj = LabelFrame(root, text = 'Projects & Clients', padx = 5, pady = 5)
+textGroupProj.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
+textGroupProj.rowconfigure(0, weight = 1)
+textGroupProj.columnconfigure(0, weight = 1)
+
+textGroupOthers = LabelFrame(root, text = 'Other Secrets', padx = 5, pady = 5)
+textGroupOthers.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
+textGroupOthers.rowconfigure(0, weight = 1)
+textGroupOthers.columnconfigure(0, weight = 1)
 
 root.columnconfigure(0, weight = 1)
 root.rowconfigure(1, weight = 1)
 
-txt = scrolledtext.ScrolledText(textGroup)
-txt.grid(column = 0, row = 3, sticky = E+W+N+S)
+texteComm = scrolledtext.ScrolledText(textGroupeComm, height=10)
+textProj = scrolledtext.ScrolledText(textGroupProj, height=10)
+textOthers = scrolledtext.ScrolledText(textGroupOthers, height=10)
+
+texteComm.grid(column = 0, row = 1)
+textProj.grid(column = 0, row = 1)
+textOthers.grid(column = 0, row = 1)
+
+textGroupSocial = LabelFrame(root, text = 'e-Mail & Social', padx = 5, pady = 5)
+textGroupSocial.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
+textGroupSocial.rowconfigure(0, weight = 1)
+textGroupSocial.columnconfigure(0, weight = 1)
+
+textSocial = scrolledtext.ScrolledText(textGroupSocial, height=10)
+textSocial.grid(column = 0, row = 1)
+
+toggleView('others')
+toggleView('projects')
+toggleView('ecomm')
+toggleView('social')
 
 root.mainloop()
 
