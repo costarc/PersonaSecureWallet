@@ -9,6 +9,11 @@ import json
 import os
 import ast
 
+group1Name = 'e-Mail & social'
+group2Name = 'Finances'
+group3Name = 'Web Sites'
+group4Name = 'Other Secrets'
+
 walletTitle = 'Personal Secure Wallet'
 walletVersion = '0.1'
 walletAuthor = 'Ronivon Costa (2021) ronivon.costa@gmail.com'
@@ -321,22 +326,22 @@ def toggleView(oper):
         pass
     else:
         
-        if view == 'social':
+        if view == 'view1':
             textGroupSocial.grid_remove()
-        elif view == 'ecomm':
+        elif view == 'view2':
             textGroupeComm.grid_remove()
-        elif view == 'projects':
+        elif view == 'view3':
             textGroupProj.grid_remove()
-        elif view == 'others':
+        elif view == 'view4':
             textGroupOthers.grid_remove()
         
-        if oper == 'social':
+        if oper == 'view1':
             textGroupSocial.grid()
-        elif oper == 'ecomm':
+        elif oper == 'view2':
             textGroupeComm.grid()
-        elif oper == 'projects':
+        elif oper == 'view3':
             textGroupProj.grid()
-        elif oper == 'others':
+        elif oper == 'view4':
             textGroupOthers.grid()
 
         view = oper
@@ -390,27 +395,27 @@ menuOptions.add_cascade(label='Edit', menu = configmenu)
 
 windowmenu = Menu(menuOptions, tearoff = 0)
 windowmenu.add_command(label='Hide/View Secrets', command = lambda: toggleView('obfs'))
-windowmenu.add_command(label='Social', command = lambda: toggleView('social'))
-windowmenu.add_command(label='eCommerce', command = lambda: toggleView('ecomm'))
-windowmenu.add_command(label='Projects', command = lambda: toggleView('projects'))
-windowmenu.add_command(label='Other Secrets', command = lambda: toggleView('others'))
+windowmenu.add_command(label=group1Name, command = lambda: toggleView('view1'))
+windowmenu.add_command(label=group2Name, command = lambda: toggleView('view2'))
+windowmenu.add_command(label=group3Name, command = lambda: toggleView('view3'))
+windowmenu.add_command(label=group4Name, command = lambda: toggleView('view4'))
 menuOptions.add_cascade(label='View', menu = windowmenu)
 
 aboutmenu = Menu(menuOptions, tearoff = 0)
 aboutmenu.add_command(label='Version', command = showVersion)
 menuOptions.add_cascade(label='About', menu = aboutmenu)
 
-textGroupeComm = LabelFrame(root, text = 'e-Commerce & Buy Web sites', padx = 5, pady = 5)
+textGroupeComm = LabelFrame(root, text = group2Name, padx = 5, pady = 5)
 textGroupeComm.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
 textGroupeComm.rowconfigure(0, weight = 1)
 textGroupeComm.columnconfigure(0, weight = 1)
 
-textGroupProj = LabelFrame(root, text = 'Projects & Clients', padx = 5, pady = 5)
+textGroupProj = LabelFrame(root, text = group3Name, padx = 5, pady = 5)
 textGroupProj.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
 textGroupProj.rowconfigure(0, weight = 1)
 textGroupProj.columnconfigure(0, weight = 1)
 
-textGroupOthers = LabelFrame(root, text = 'Other Secrets', padx = 5, pady = 5)
+textGroupOthers = LabelFrame(root, text = group4Name, padx = 5, pady = 5)
 textGroupOthers.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
 textGroupOthers.rowconfigure(0, weight = 1)
 textGroupOthers.columnconfigure(0, weight = 1)
@@ -426,7 +431,7 @@ texteComm.grid(column = 0, row = 1)
 textProj.grid(column = 0, row = 1)
 textOthers.grid(column = 0, row = 1)
 
-textGroupSocial = LabelFrame(root, text = 'e-Mail & Social', padx = 5, pady = 5)
+textGroupSocial = LabelFrame(root, text = group1Name, padx = 5, pady = 5)
 textGroupSocial.grid(row = 1, column = 0, columnspan = 3, padx = 10, pady = 10)
 textGroupSocial.rowconfigure(0, weight = 1)
 textGroupSocial.columnconfigure(0, weight = 1)
@@ -434,10 +439,10 @@ textGroupSocial.columnconfigure(0, weight = 1)
 textSocial = scrolledtext.ScrolledText(textGroupSocial, height=10)
 textSocial.grid(column = 0, row = 1)
 
-toggleView('others')
-toggleView('projects')
-toggleView('ecomm')
-toggleView('social')
+toggleView('view4')
+toggleView('view3')
+toggleView('view2')
+toggleView('view1')
 
 root.mainloop()
 
