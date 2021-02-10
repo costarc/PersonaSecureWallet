@@ -24,8 +24,9 @@ socialContent = ''
 ecommContent = ''
 projContent = ''
 othercontent = ''
-view = 'social'
+view = 'view1'
 walletFileName = ''
+fileSave = True
 
 configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'a', '-aoa', '-t7z', '-m0=lzma2', '-mx=9', '-mfb=64', '-md=32m', '-ms=on', '-mhe=on', '-si'], 'decryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'x', '-so'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
 if platform.system() == 'Windows':
@@ -375,6 +376,14 @@ def setOptions():
     elif walletPoweredBy == '7-zip':
         encAppOpt1.select()
 
+def exitProgram():
+    if textSocial.edit_modified() or texteComm.edit_modified() or textProj.edit_modified() or textOthers.edit_modified():
+        MsgBox = messagebox.askquestion ('Exit Application','Wallet content changed but not saved. Confirm you want to exit the application',icon = 'warning')
+        if MsgBox == 'yes':
+            root.destroy()
+    else:
+        root.destroy()
+  
 root = Tk()
 root.title("Personal Safe Wallet "+walletFileName)
 root.geometry('500x200')
@@ -386,6 +395,7 @@ filemenu = Menu(menuOptions, tearoff = 0)
 filemenu.add_command(label='Open...', command = openWallet)
 filemenu.add_command(label='Save', command = lambda: saveWallet(walletFileName))
 filemenu.add_command(label='Save As...', command = saveAsWallet)
+filemenu.add_command(label='Exit', command = exitProgram)
 menuOptions.add_cascade(label='File', menu = filemenu)
 
 configmenu = Menu(menuOptions, tearoff = 0)
@@ -444,5 +454,6 @@ toggleView('view3')
 toggleView('view2')
 toggleView('view1')
 
+root.protocol("WM_DELETE_WINDOW", exitProgram)
 root.mainloop()
 
