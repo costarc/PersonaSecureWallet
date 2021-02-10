@@ -20,6 +20,7 @@ ecommContent = ''
 projContent = ''
 othercontent = ''
 view = 'social'
+walletFileName = ''
 
 configData = {'encryptionToool': {'openssl': {'walletPoweredBy': 'OpenSSL', 'encryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a'], 'decryptionCommand': ['/usr/bin/openssl', 'enc', '-aes-256-ecb', '-a', '-d'], 'encryptParam': '-k', 'decryptParam': '-k', 'fileOutParam': '-out', 'fileInParam': '-in', 'myFileTypes': '(("AES files", "*.aes"), ("Backup files", "*.bak"), ("All files", "*"))'}, '7-zip': {'walletPoweredBy': '7-Zip', 'encryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'a', '-aoa', '-t7z', '-m0=lzma2', '-mx=9', '-mfb=64', '-md=32m', '-ms=on', '-mhe=on', '-si'], 'decryptionCommand': ['C:\\Program Files\\7-Zip\\7z.exe', 'x', '-so'], 'encryptParam': '-p%', 'decryptParam': '-p%', 'fileOutParam': '', 'fileInParam': '', 'myFileTypes': '(("7-Zip files", "*.7z"), ("Backup files", "*.bak"), ("All files", "*"))'}}}
 if platform.system() == 'Windows':
@@ -65,13 +66,20 @@ def setPass():
 
     btn = Button(passwindow, text = 'Set', command = lambda: validatePass(passwindow, passfield1.get(), passfield2.get()))
     btn.grid(column = 2, row = 1)
+    passfield1.bind('<Return>', lambda event: passfield2.focus())
+    passfield2.bind('<Return>', lambda event: validatePass(passwindow, passfield1.get(), passfield2.get()))
+
 
 def openWallet():
     global passphrase
     global isObfuscated
-    global walletContent
+    global socialContent
+    global ecommContent
+    global projContent
+    global otherContent
     global configData
     global walletPoweredBy
+    global walletFileName
 
     decryptParam = configData['encryptionToool'][walletPoweredBy]['decryptParam']
     fileInParam = configData['encryptionToool'][walletPoweredBy]['fileInParam']
@@ -84,7 +92,11 @@ def openWallet():
     if len(passphrase) == 0:
         try:
             with open(walletName, 'r') as fileIn:
-                walletContent = fileIn.read()
+                fileContent = json.loads(fileIn.read())
+                socialContent = fileContent["data"]["social"]
+                ecommContent = fileContent["data"]["ecommerce"]
+                projContent = fileContent["data"]["projects"]
+                otherContent = fileContent["data"]["others"]
                 successLoad = True
         except Exception as e:
             messagebox.showerror('Failed', str(e))
@@ -103,7 +115,7 @@ def openWallet():
 
         try:
             process = Popen(loadCommand, stdout=PIPE, stderr=PIPE)
-            (walletContent, err) = process.communicate()
+            (fc, err) = process.communicate()
             exit_code = process.wait()
             if exit_code != 0:
                 if 'bad decrypt' in str(err).lower() or 'error' in str(err).lower or 'wrong pass' in str(err).lower(): 
@@ -111,18 +123,40 @@ def openWallet():
                 else:
                     messagebox.showerror('Failed', 'Could not open or decrypt the file.')
             else:
+                fileContent = json.loads(fc.decode())
+                socialContent = fileContent["data"]["social"]
+                ecommContent = fileContent["data"]["ecommerce"]
+                projContent = fileContent["data"]["projects"]
+                otherContent = fileContent["data"]["others"]
                 successLoad = True
 
         except Exception as e:
             messagebox.showerror('Failed', str(e))
 
     if successLoad:
+        walletFileName = walletName
+        root.title("Personal Safe Wallet:"+walletFileName.rpartition('/')[2])
         if isObfuscated == False:
-            txt.delete('1.0', END)
-            txt.insert('1.0', walletContent)
+            textSocial.delete('1.0', END)
+            texteComm.delete('1.0', END)
+            textProj.delete('1.0', END)
+            textOthers.delete('1.0', END)
 
+            textSocial.insert('1.0', socialContent)
+            texteComm.insert('1.0', ecommContent)
+            textProj.insert('1.0', projContent)
+            textOthers.insert('1.0', otherContent)
 
-def saveWallet():
+def saveAsWallet():
+    global configData
+    global walletPoweredBy
+
+    myFileTypes = ast.literal_eval(configData['encryptionToool'][walletPoweredBy]['myFileTypes'])
+    walletName = filedialog.asksaveasfilename(filetypes = myFileTypes)
+
+    saveWallet(walletName)
+
+def saveWallet(walletName):
     global passphrase
     global isObfuscated
     global socialContent
@@ -131,16 +165,17 @@ def saveWallet():
     global otherContent
     global configData
     global walletPoweredBy
-    
-    encryptParam = configData['encryptionToool'][walletPoweredBy]['encryptParam']
-    fileOutParam = configData['encryptionToool'][walletPoweredBy]['fileOutParam']
-    myFileTypes = ast.literal_eval(configData['encryptionToool'][walletPoweredBy]['myFileTypes'])
-    saveCommand = configData['encryptionToool'][walletPoweredBy]['encryptionCommand'][:]
+    global walletFileName
+
+    if walletName == '':
+        myFileTypes = ast.literal_eval(configData['encryptionToool'][walletPoweredBy]['myFileTypes'])
+        walletName = filedialog.asksaveasfilename(filetypes = myFileTypes)
+    else:
+        walletFileName = walletName
 
     if len(passphrase) == 0:
         messagebox.showwarning('Attention', 'Passphrase is not set - this file will be saved in plain text.\nTo encrypt the file on disk, set the passphrase before saving it.')
 
-    walletName = filedialog.asksaveasfilename(filetypes = myFileTypes)
     if os.path.isfile(walletName):
         try:
             move(walletName, walletName+'.bak')
@@ -148,44 +183,64 @@ def saveWallet():
             messagebox.showerror('Failed', 'Failed to backup current wallet.\nSave using a different name.\n'+str(e))
             return
 
-    walletContent = {'config': [{}], 'data': [{}] }
+    encryptParam = configData['encryptionToool'][walletPoweredBy]['encryptParam']
+    fileOutParam = configData['encryptionToool'][walletPoweredBy]['fileOutParam']
+    saveCommand = configData['encryptionToool'][walletPoweredBy]['encryptionCommand'][:]
+
+    walletContent = {}
+    walletContent["config"] = {}
+    walletContent["data"] = {}
+
+    if textSocial.get('end-1c', 'end') == '\n':
+        textSocial.delete('end-1c', 'end')
+    if texteComm.get('end-1c', 'end') == '\n':
+        texteComm.delete('end-1c', 'end')
+    if textProj.get('end-1c', 'end') == '\n':
+        textProj.delete('end-1c', 'end')
+    if textOthers.get('end-1c', 'end') == '\n':
+        textOthers.delete('end-1c', 'end')
 
     if len(passphrase) == 0:
         try:
-            socialContent = textSocial.get('1.0', END)
-            ecommContent = texteComm.get('1.0', END)
-            projContent = textProj.get('1.0', END)
-            otherContent = textOthers.get('1.0', END)
-            walletContent['data'].append({'social':socialContent})
-            walletContent['data'].append({'ecommerce':ecommContent})
-            walletContent['data'].append({'projects':projContent})
-            walletContent['data'].append({'others':otherContent})
-
-            with open(walletName, 'a') as fileOut:
-                fileOut.write(json.dumps(walletContent))
-        except Exception as e:
-            messagebox.showerror('Failed', str(e))
-    else:
-        if True:
-        #try:
             if isObfuscated == False:
                 fileContent1 = textSocial.get('1.0', END)
                 fileContent2 = texteComm.get('1.0', END)
                 fileContent3 = textProj.get('1.0', END)
                 fileContent4 = textOthers.get('1.0', END)
-                walletContent['data'].append({'social':fileContent1})
-                walletContent['data'].append({'ecommerce':fileContent2})
-                walletContent['data'].append({'projects':fileContent3})
-                walletContent['data'].append({'others':fileContent4})
             else:
-                fileContent1 = bytes(socialContent[:], encoding = 'utf-8')
-                fileContent2 = bytes(ecommContent[:], encoding = 'utf-8')
-                fileContent3 = bytes(projContent[:], encoding = 'utf-8')
-                fileContent4 = bytes(otherContent[:], encoding = 'utf-8')
-                walletContent['data'].append({'social':fileContent1})
-                walletContent['data'].append({'ecommerce':fileContent2})
-                walletContent['data'].append({'projects':fileContent3})
-                walletContent['data'].append({'others':fileContent4})
+                fileContent1 = socialContent[:]
+                fileContent2 = ecommContent[:]
+                fileContent3 = projContent[:]
+                fileContent4 = otherContent[:]
+
+            walletContent["data"]["social"] = fileContent1
+            walletContent["data"]["ecommerce"] = fileContent2
+            walletContent["data"]["projects"] = fileContent3
+            walletContent["data"]["others"] = fileContent4
+
+            with open(walletName, 'a') as fileOut:
+                fileOut.write(json.dumps(walletContent))
+                successSave = True
+
+        except Exception as e:
+            messagebox.showerror('Failed', str(e))
+    else:
+        try:
+            if isObfuscated == False:
+                fileContent1 = textSocial.get('1.0', END)
+                fileContent2 = texteComm.get('1.0', END)
+                fileContent3 = textProj.get('1.0', END)
+                fileContent4 = textOthers.get('1.0', END)
+            else:
+                fileContent1 = socialContent[:]
+                fileContent2 = ecommContent[:]
+                fileContent3 = projContent[:]
+                fileContent4 = otherContent[:]
+
+            walletContent["data"]["social"] = fileContent1
+            walletContent["data"]["ecommerce"] = fileContent2
+            walletContent["data"]["projects"] = fileContent3
+            walletContent["data"]["others"] = fileContent4
 
             if '%' in encryptParam:
                 cryptParm = encryptParam.replace('%',passphrase)
@@ -198,20 +253,22 @@ def saveWallet():
                 saveCommand.append(fileOutParam)
 
             saveCommand.append(walletName)
-           
-            print(walletContent)
-            print(type(walletContent))
-
+  
             process = Popen(saveCommand, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-            processoutput = process.communicate(input = bytes(str(walletContent), "utf-8"))
+            processoutput = process.communicate(input = bytes(json.dumps(walletContent), "utf-8"))
             exit_code = process.wait()
             if exit_code == 0:
+                successSave = True
                 messagebox.showinfo('Success', 'File Saved.')
             else:
                 messagebox.showerror('Failed', str(process) + ' - ' + str(processoutput))
 
-        #except Exception as e:
-        #    messagebox.showerror('Failed Exception', str(e))
+        except Exception as e:
+            messagebox.showerror('Failed Exception', str(e))
+
+    if successSave == True:
+        walletFileName = walletName
+        root.title("Personal Safe Wallet:"+walletFileName.rpartition('/')[2])
 
 def toggleView(oper):
     global isObfuscated
@@ -314,7 +371,7 @@ def setOptions():
         encAppOpt1.select()
 
 root = Tk()
-root.title("Personal Safe Wallet")
+root.title("Personal Safe Wallet "+walletFileName)
 root.geometry('500x200')
 
 menuOptions = Menu(root)
@@ -322,7 +379,8 @@ root.config(menu = menuOptions)
 
 filemenu = Menu(menuOptions, tearoff = 0)
 filemenu.add_command(label='Open...', command = openWallet)
-filemenu.add_command(label='Save As...', command = saveWallet)
+filemenu.add_command(label='Save', command = lambda: saveWallet(walletFileName))
+filemenu.add_command(label='Save As...', command = saveAsWallet)
 menuOptions.add_cascade(label='File', menu = filemenu)
 
 configmenu = Menu(menuOptions, tearoff = 0)

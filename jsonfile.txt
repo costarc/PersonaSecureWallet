@@ -1,1 +1,0 @@
-{"config": [{}], "data": [{}, {"social": "test1\n"}, {"ecommerce": "test2\n"}, {"projects": "test3\n"}, {"others": "test4\n"}]}
