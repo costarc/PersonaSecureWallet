@@ -141,7 +141,7 @@ def openWallet():
 
     if successLoad:
         walletFileName = walletName
-        root.title("Personal Safe Wallet:"+walletFileName.rpartition('/')[2])
+        root.title(walletTitle+":"+walletFileName.rpartition('/')[2])
         if isObfuscated == False:
             textSocial.delete('1.0', END)
             texteComm.delete('1.0', END)
@@ -274,7 +274,7 @@ def saveWallet(walletName):
 
     if successSave == True:
         walletFileName = walletName
-        root.title("Personal Safe Wallet:"+walletFileName.rpartition('/')[2])
+        root.title(walletTitle+":"+walletFileName.rpartition('/')[2])
 
 def toggleView(oper):
     global isObfuscated
@@ -385,7 +385,7 @@ def exitProgram():
         root.destroy()
   
 root = Tk()
-root.title("Personal Safe Wallet "+walletFileName)
+root.title(walletTitle+" "+walletFileName)
 root.geometry('500x200')
 
 menuOptions = Menu(root)
