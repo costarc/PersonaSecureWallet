@@ -457,3 +457,4 @@ toggleView('view1')
 root.protocol("WM_DELETE_WINDOW", exitProgram)
 root.mainloop()
 
+
